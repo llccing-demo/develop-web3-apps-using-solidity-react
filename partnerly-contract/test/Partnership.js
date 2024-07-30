@@ -55,4 +55,14 @@ describe("Partnership", () => {
       "More than one address should be provided to establish a partnership"
     );
   })
+
+  it('can NOT be deployed when any of the split ratios is less than one', async () => {
+    const Constract = await hre.ethers.getContractFactory('Partnership');
+    const [owner, person1] = await hre.ethers.getSigners();
+    const addresses = [owner.address, person1.address];
+    const splitRatios = [1, 0];
+    await expect(Constract.deploy(addresses, splitRatios)).to.be.revertedWith(
+      "Split ratio should be greater than zero"
+    );
+  })
 })

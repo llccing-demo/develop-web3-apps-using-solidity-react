@@ -63,22 +63,19 @@ as the result uppper, I completed my first contract
 
 ## Details of the Contract
 
-
-## Quiz 1: Creating a Contract
-
 ## Challenge: Create a Contract with Attritubes and Functions
-
-## Solution: Create a Contract with Attributes and Fuctions
 
 ## Smart Contracts Continued
 
+Add split ratios to contract and add test
+
 ## Requiring Valid Arguments
 
-## Quiz 2: Smart Contracts
+Test first, TDD, test drive development.
+
+A `pure` function means that the operation inside the function doesn’t rely on any external state.
 
 ## Challenge: Split Ratios
-
-## Solution: Split Ratios
 
 ## Receiving Payments
 
