@@ -43,6 +43,46 @@ It works with Ethereum Virtual Machine (EVM).
 
 # Introduction to Solidity and Smart Contract Development
 
+## Web3 Apps and Initialization and Execution of Contracts
+
+
+## Challenge: Create a Contract
+
+## Solution: Create a Contract
+
+## Details of the Contract
+
+## Quiz 1: Creating a Contract
+
+## Challenge: Create a Contract with Attritubes and Functions
+
+## Solution: Create a Contract with Attributes and Fuctions
+
+## Smart Contracts Continued
+
+## Requiring Valid Arguments
+
+## Quiz 2: Smart Contracts
+
+## Challenge: Split Ratios
+
+## Solution: Split Ratios
+
+## Receiving Payments
+
+## Sending Payments
+
+## Challenge: Create a Contract That Accepts Payments
+
+## Solution: Create a Contract That Accepts Payments
+
+## Preventing Overdrawing from the Account
+
+## Finalizing the run Script
+
+## Quiz 3: Payments
+
+## Chapter Summary
 # Introduction to Web3 App Development Using Solidity and React
 
 
