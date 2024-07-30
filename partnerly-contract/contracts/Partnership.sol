@@ -4,17 +4,23 @@ pragma solidity ^0.8.24;
 import "hardhat/console.sol";
 
 contract Partnership {
-  string private deploymentMessage = "Partnership contract deployed";
-  uint256 private partnerAmount = 2;
   address[] public addresses;
+  uint256[] public splitRatios;
 
-  constructor(address[] memory _addresses) {
+
+  constructor(address[] memory _addresses, uint256[] memory _splitRatios) {
     require(
-      _addresses.length == partnerAmount,
-      "you can't have more than 2 partners"
+      _addresses.length > 1,
+      "More than one address should be provided to establish a partnership"
+    );
+
+    require(
+      _splitRatios.length == _addresses.length,
+      "the address amount and the split ratio amount should be equal"
     );
 
     addresses = _addresses;
-    console.log(deploymentMessage);
+    splitRatios = _splitRatios;
+    console.log("Constract is deployed");
   }
 }
