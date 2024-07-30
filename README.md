@@ -48,6 +48,7 @@ It works with Ethereum Virtual Machine (EVM).
 ## Challenge: Create a Contract
 
 ```shell
+use command `node scripts/run.js` or
 ~/projects/github/educative/develop-web3-apps-using-solidity-react/partnerly-contract$ npm run dev
 
 > partnerly-contract@1.0.0 dev
@@ -59,9 +60,9 @@ Partnership deployed to: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 ```
 
 as the result uppper, I completed my first contract
-## Solution: Create a Contract
 
 ## Details of the Contract
+
 
 ## Quiz 1: Creating a Contract
 
