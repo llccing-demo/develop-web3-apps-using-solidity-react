@@ -25,6 +25,13 @@ contract Partnership {
     console.log("Constract is deployed");
   }
 
+  function getBalance() public view returns (uint256) {
+    return address(this).balance;
+  }
+
+  receive() external payable {
+  }
+
   function getSplitRatiosTotal(uint[] memory _splitRatios) private pure returns (uint256) {
     uint256 total = 0;
     for (uint256 i = 0; i < _splitRatios.length; i++) {
