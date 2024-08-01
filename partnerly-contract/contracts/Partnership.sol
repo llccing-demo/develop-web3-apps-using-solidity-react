@@ -4,11 +4,11 @@ pragma solidity ^0.8.24;
 import "hardhat/console.sol";
 
 contract Partnership {
-  address[] public addresses;
+  address payable[] public addresses;
   uint256[] public splitRatios;
   uint256 private splitRatiosTotal;
 
-  constructor(address[] memory _addresses, uint256[] memory _splitRatios) {
+  constructor(address payable[] memory _addresses, uint256[] memory _splitRatios) {
     require(
       _addresses.length > 1,
       "More than one address should be provided to establish a partnership"
@@ -27,6 +27,23 @@ contract Partnership {
 
   function getBalance() public view returns (uint256) {
     return address(this).balance;
+  }
+
+  function withdraw() public {
+    uint256 balance = getBalance();
+    uint256 addressesLength = addresses.length;
+    
+    console.log("before Balance: %s", balance);
+
+    require(balance > 0, "Insufficient balance");
+
+    for (uint256 i = 0; i < addressesLength; i++) {
+      addresses[i].transfer(
+        (balance/splitRatiosTotal) * splitRatios[i]
+      );
+    }
+
+    console.log("after Balance: %s", getBalance());
   }
 
   receive() external payable {
