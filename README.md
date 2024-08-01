@@ -77,6 +77,36 @@ A `pure` function means that the operation inside the function doesn’t rely on
 
 ## Challenge: Split Ratios
 
+Split ratios in smart contracts typically refer to the way funds or tokens are distributed among different parties or addresses. This concept is often used in various blockchain applications, such as revenue sharing, token distribution, or automatic payments
+
+```
+
+contract ChallengeRatiosSplit {
+    uint256[] public splitRatios;
+
+    constructor(uint256[] memory _splitRatios) {
+        require(
+            _splitRatios.length > 2,
+            "More than two address should be provided to establish a partnership"
+        );
+
+        checkSplitRatios(_splitRatios);
+
+        splitRatios = _splitRatios;
+        console.log("Constract is deployed");
+    }
+
+    function checkSplitRatios(uint256[] memory _splitRatios) private pure {
+        for (uint256 i = 0; i < _splitRatios.length; i++) {
+            require(
+                _splitRatios[i] > 5,
+                "Split ratio should be greater than five"
+            );
+        }
+    }
+}
+```
+
 ## Receiving Payments
 
 ## Sending Payments
