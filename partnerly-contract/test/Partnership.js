@@ -124,8 +124,7 @@ describe("Partnership", () => {
       expect(finalBalance).to.not.equal(0);
       await partnership.withdraw()
     })
-  })
-  describe('withdraw', () => {
+
     it('can NOT be called if the contract balance is more than 0', async () => {
       const Contract = await ethers.getContractFactory('Partnership');
       const [owner, person1] = await ethers.getSigners();
@@ -144,6 +143,33 @@ describe("Partnership", () => {
       await expect(
         partnership.withdraw()
       ).to.be.revertedWith('Insufficient balance');
+    })
+
+    it('can NOT be called when the total split ratio is greater than the contract balance', async () => {
+      const Contract = await ethers.getContractFactory('Partnership');
+      const [owner, person1] = await ethers.getSigners();
+      const addresses = [owner.address, person1.address];
+      const splitRatios = [10, 10];
+
+      expect(addresses.length).to.equal(splitRatios.length);
+
+      const partnership = await Contract.deploy(addresses, splitRatios);
+      await partnership.waitForDeployment();
+
+      const partnershipAddress = await partnership.getAddress();
+      expect(await partnership.getBalance()).to.equal(0);
+
+      await owner.sendTransaction({
+        to: partnershipAddress,
+        value: ethers.parseEther('0.00000000000000001')
+      });
+
+      expect(await partnership.getBalance()).to.equal(10);
+
+      await expect(
+        partnership.withdraw()
+      ).to.be.revertedWith('Balance should be greater than the total split ratio');
+
     })
   })
 })

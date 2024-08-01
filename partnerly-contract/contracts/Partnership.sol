@@ -22,7 +22,7 @@ contract Partnership {
     addresses = _addresses;
     splitRatios = _splitRatios;
     splitRatiosTotal = getSplitRatiosTotal(_splitRatios);
-    console.log("Constract is deployed");
+   console.log("Constract is deployed");
   }
 
   function getBalance() public view returns (uint256) {
@@ -33,9 +33,11 @@ contract Partnership {
     uint256 balance = getBalance();
     uint256 addressesLength = addresses.length;
     
-    console.log("before Balance: %s", balance);
+    // console.log("before Balance: %s", balance);
 
     require(balance > 0, "Insufficient balance");
+
+    require(balance >= splitRatiosTotal, "Balance should be greater than the total split ratio");
 
     for (uint256 i = 0; i < addressesLength; i++) {
       addresses[i].transfer(
@@ -43,7 +45,7 @@ contract Partnership {
       );
     }
 
-    console.log("after Balance: %s", getBalance());
+    // console.log("after Balance: %s", getBalance());
   }
 
   receive() external payable {
