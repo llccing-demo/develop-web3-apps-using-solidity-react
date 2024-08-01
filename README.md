@@ -109,19 +109,58 @@ contract ChallengeRatiosSplit {
 
 ## Receiving Payments
 
+code in js
+```
+  await owner.sendTransaction({
+    to: contractAddress,
+    value: ethers.parseEther('5.0')
+  });
+```
+
+code in .sol
+```
+receive() external payable {}
+```
+
 ## Sending Payments
 
-## Challenge: Create a Contract That Accepts Payments
+code in js
+```
+ partnership.withdraw()
 
-## Solution: Create a Contract That Accepts Payments
+```
 
-## Preventing Overdrawing from the Account
+code in .sol
+```
+ function withdraw() public {
+    uint256 balance = getBalance();
+    uint256 addressesLength = addresses.length;
+    
+    // console.log("before Balance: %s", balance);
 
-## Finalizing the run Script
+    require(balance > 0, "Insufficient balance");
 
-## Quiz 3: Payments
+    require(balance >= splitRatiosTotal, "Balance should be greater than the total split ratio");
+
+    for (uint256 i = 0; i < addressesLength; i++) {
+      addresses[i].transfer(
+        (balance/splitRatiosTotal) * splitRatios[i]
+      );
+    }
+
+    // console.log("after Balance: %s", getBalance());
+  }
+
+```
 
 ## Chapter Summary
+
+- Through upper, what we have known:
+- Permanently store data
+- Securely receive transactions
+- Store funds
+- Transfer those funds to specified accounts (wallet addresses)
+
 # Introduction to Web3 App Development Using Solidity and React
 
 
