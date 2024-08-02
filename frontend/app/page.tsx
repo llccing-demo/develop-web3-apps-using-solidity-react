@@ -31,7 +31,11 @@ export default function Home() {
   };
 
   function Title({ name }: { name: string }) {
-    return <h1>Hello {name}</h1>;
+    return (
+      <h1 className="text-7xl md:text-6xl font-extrabold text-indigo-600 mb-3 pb-285">
+        {name}
+      </h1>
+    );
   }
 
   function MainButton({
@@ -44,9 +48,35 @@ export default function Home() {
     label: string;
   }) {
     return (
-      <button onClick={onClick} disabled={disabled}>
-        <span>{label}</span>
+      <button
+        className={`inline-flex rounded-md shadow disabled:opacity-50`}
+        onClick={onClick}
+        disabled={disabled}
+      >
+        <span
+          className={`inline-flex items-center justify-center px-5 py-3 border-transparent 
+            text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700`}
+        >
+          {label}
+        </span>
       </button>
+    );
+  }
+
+  function WalletMessage({
+    onClick,
+    isConnected,
+  }: {
+    onClick: () => void;
+    isConnected: boolean;
+  }) {
+    return (
+      <div>
+        <button onClick={onClick}></button>
+        <span>
+          {isConnected ? "Wallet is connected" : "wallet is not connected"}
+        </span>
+      </div>
     );
   }
 
@@ -66,23 +96,34 @@ export default function Home() {
   }, []);
 
   return (
-    <main>
-      <Title name="Time" />
+    <div className="flex flex-col min-h-screen">
+      <main className="flex flex-1 flex-col items-center justify-start py-8 pt-12 px-6 md:pt-20 text-zinc-700">
+        <Title name="Partnerly" />
 
-      {hasWalletWarning ? (
-        <p>You will need MetaMask or equivalent to use this app.</p>
-      ) : (
-        <p>Your wallet is connected!</p>
-      )}
-      {!currnetAccount && (
-        <div>
-          <MainButton
-            onClick={connectWallet}
-            disabled={hasWalletWarning}
-            label="Connect Wallet"
-          />
-        </div>
-      )}
-    </main>
+        <section className="max-w-md text-center mb-12">
+          <p className="text-xl">
+            Partnerly creates a smart contract for you and your partner that
+            distributes the payments to the partnership contract in a
+            predetermined split ratio.
+          </p>
+          {hasWalletWarning ? (
+            <p className="mt-4 text-red-600">
+              You will need MetaMask or equivalent to use this app.
+            </p>
+          ) : (
+            <p>Your wallet is connected!</p>
+          )}
+          {!currnetAccount && (
+            <div className="mt-4">
+              <MainButton
+                onClick={connectWallet}
+                disabled={hasWalletWarning}
+                label="Connect Wallet"
+              />
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
   );
 }
