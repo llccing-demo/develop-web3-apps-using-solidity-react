@@ -163,4 +163,39 @@ code in .sol
 
 # Introduction to Web3 App Development Using Solidity and React
 
+## Getting Started
+
+use nextjs create a new project
+
+```shell
+npx create-next-app@latest
+```
+
+## Checking for a Wallet
+
+```js
+const checkIfWalletIsConnected = () => {
+    return Boolean((window as any).ethereum);
+  };
+```
+
+## Interacting with the Blockchain
+
+## Connecting to the Wallet
+
+## Styling the App
+
+## Capturing the Contract Details
+
+## Adding a way to Deply the Contract
+
+## Displaying the Deployed Contract Address
+
+## Implementing the withdraw Function 
+
+## Navigating to the Withdraw Page
+
+## Conclusion
+
+
 
