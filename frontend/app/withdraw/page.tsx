@@ -1,20 +1,14 @@
-"use client";
-
+'use client'
 import { useEffect, useRef, useState } from "react";
-import { Web3 } from "web3";
-import Contract from "../../partnerly-contract/artifacts/contracts/Partnership.sol/Partnership.json";
+import Web3 from "web3";
+import Contract from "../../../partnerly-contract/artifacts/contracts/Partnership.sol/Partnership.json";
 
-interface Address {
-  id: string;
-  label: string;
-  address: string;
-  error: string;
-  split: number;
-}
-
-export default function Home() {
+export default function WithdrawPage() {
   const [hasWalletWarning, setHasWalletWarning] = useState(false);
-  const [currnetAccount, setCurrnetAccount] = useState(null);
+  const [address, setAddress] = useState("");
+  const [error, setError] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [currentAccount, setCurrentAccount] = useState(null);
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployedContractAddress, setDeployedContractAddress] = useState("");
   const web3 = useRef<Web3 | null>(null);
@@ -97,28 +91,6 @@ export default function Home() {
     );
   });
 
-  const checkIfWalletIsConnected = () => {
-    return Boolean((window as any).ethereum);
-  };
-
-  const connectWallet = async () => {
-    if (!checkIfWalletIsConnected()) {
-      return;
-    }
-
-    try {
-      const { ethereum } = window as any;
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      console.log("Connected", accounts[0]);
-      setCurrnetAccount(accounts[0]);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const handleStartPartnership = async () => {
     const addresses = [partners[0].address, partners[1].address];
 
@@ -140,7 +112,7 @@ export default function Home() {
 
     contract
       .deploy(contractDeploymentData)
-      .send({ from: currnetAccount!, gas: `${gas}` })
+      .send({ from: currentAccount!, gas: `${gas}` })
       .on("error", (error) => {
         console.error(error);
         setIsDeploying(false);
@@ -164,21 +136,49 @@ export default function Home() {
     setDeployedContractAddress("");
   };
 
-  function Title({ name }: { name: string }) {
-    return (
-      <h1 className="text-7xl md:text-6xl font-extrabold text-indigo-600 mb-3 pb-285">
-        {name}
-      </h1>
-    );
-  }
+  const checkIfWalletIsConnected = () => {
+    return Boolean((window as any).ethereum);
+  };
+
+  const connectWallet = async () => {
+    if (!checkIfWalletIsConnected()) {
+      return;
+    }
+
+    try {
+      const { ethereum } = window as any;
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
+
+      console.log("Connected", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  const addressInput = (
+    <AddressInput
+      label={""}
+      value={address}
+      onChange={(value) => {
+        setAddress(value);
+      }}
+      onBlur={(value) => {
+        const isValueAddress = web3.current!.utils.isAddress(value);
+        setError(isValueAddress ? "" : "Enter a valid wallet address");
+      }}
+      error={error}
+    />
+  );
 
   function MainButton({
     onClick,
-    disabled,
+    disabled = false,
     label,
   }: {
     onClick: () => void;
-    disabled: boolean;
+    disabled?: boolean;
     label: string;
   }) {
     return (
@@ -194,23 +194,6 @@ export default function Home() {
           {label}
         </span>
       </button>
-    );
-  }
-
-  function WalletMessage({
-    onClick,
-    isConnected,
-  }: {
-    onClick: () => void;
-    isConnected: boolean;
-  }) {
-    return (
-      <div>
-        <button onClick={onClick}></button>
-        <span>
-          {isConnected ? "Wallet is connected" : "wallet is not connected"}
-        </span>
-      </div>
     );
   }
 
@@ -313,81 +296,69 @@ export default function Home() {
     );
   }
 
-  if (deployedContractAddress) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <main className="flex flex-1 flex-col items-center justify-start py-8 pt-12 px-6 md:pt-20 text-zinc-700">
-          <h1 className="text-5xl md:text-6xl font-extrabold mb-3 pb-2 text-indigo-600">
-            Congratulations
-          </h1>
+  const handleWithdraw = async () => {
+    const { abi } = Contract;
+    const contract = new web3.current!.eth.Contract(abi, address);
 
-          <section className="max-w-md text-center mb-12">
-            <p className="text-sm mb-6">
-              Your contract is now deployed at this address. <br />
-              <span className="font-bold">You should write it down</span>
-            </p>
-            <p className="font-bold mb-6 text-sm border-dashed border-2 p-1 border-slate-600">
-              {deployedContractAddress}
-            </p>
-            <p className="text-sm">
-              Any payment made to this address will split in between you and
-              your partner when withdrawn.
-            </p>
-            <div className="p-4 flex flex-col justify-center items-center">
-              <MainButton
-                label={"I wrote down the address"}
-                disabled={false}
-                onClick={handleConfirm}
-              ></MainButton>
-            </div>
-          </section>
-        </main>
-      </div>
-    );
-  }
+    const gas = await contract.methods.withdraw().estimateGas();
+
+    setIsProcessing(true);
+
+    contract.methods
+      .withdraw()
+      .send({ from: currentAccount!, gas: gas + "" })
+      .on("error", (error) => {
+        console.log("error", error);
+        setIsProcessing(false);
+      })
+      .on("receipt", (receipt) => {
+        // receipt will contain deployed contract address
+        console.log("Receipt", receipt);
+
+        setIsProcessing(false);
+      })
+      .on("confirmation", () => {
+        console.log("Confirmed");
+      });
+  };
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex flex-1 flex-col items-center justify-start py-8 pt-12 px-6 md:pt-20 text-zinc-700">
-        <Title name="Partnerly" />
+    <main className="flex flex-1 flex-col items-center justify-start py-8 pt-12 md:pt-20 text-zinc-700 px-6">
+      <h1 className="text-5xl font-extrabold mb-3 pb-2">Withdraw</h1>
 
-        <section className="max-w-md text-center mb-12">
-          <p className="text-xl">
-            Partnerly creates a smart contract for you and your partner that
-            distributes the payments to the partnership contract in a
-            predetermined split ratio.
+      <section className="max-w-md text-center">
+        <p className="text-md mb-4">
+          Initiate a payout from a given Partnerly contract to the recorded
+          addresses in that contract.
+        </p>
+
+        {hasWalletWarning && (
+          <p className="mt-4 text-red-600">
+            You will need Metamask or equivalent to use this app.
           </p>
-          {hasWalletWarning && (
-            <p className="mt-4 text-red-600">
-              You will need MetaMask or equivalent to use this app.
-            </p>
-          )}
-          {!currnetAccount && (
-            <div className="mt-4">
-              <MainButton
-                onClick={connectWallet}
-                disabled={hasWalletWarning}
-                label="Connect Wallet"
-              />
-            </div>
-          )}
-        </section>
-
-        {currnetAccount && (
-          <div className="grid grid-cols-1 gap-3 mb-6">{addressInputs}</div>
         )}
 
-        {currnetAccount && (
-          <div className="flex flex-col justify-center items-center p-3">
-            <div>
-              <MainButton
-                onClick={handleStartPartnership}
-                disabled={hasErrors || hasEmptyValues || isDeploying}
-                label={isDeploying ? "Deploying" : "Partner Up!"}
-              />
-            </div>
+        {!currentAccount && (
+          <div className="mt-4">
+            <MainButton onClick={connectWallet} label={"Connect Wallet"} />
           </div>
         )}
-      </main>
-    </div>
+
+        {currentAccount && (
+          <section>
+            <div className="grid grid-cols-1 gap-3 mb-3">{addressInput}</div>
+
+            <div className="flex flex-col justify-center items-center">
+              <div>
+                <MainButton
+                  onClick={handleWithdraw}
+                  disabled={Boolean(error) || !Boolean(address) || isProcessing}
+                  label={isProcessing ? "Processing" : "Withdraw"}
+                />
+              </div>
+            </div>
+          </section>
+        )}
+      </section>
+    </main>
   );
 }
