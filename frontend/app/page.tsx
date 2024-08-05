@@ -1,14 +1,8 @@
 "use client";
 
-import { on } from "events";
-import {
-  useState,
-  useEffect,
-  useRef,
-  ChangeEventHandler,
-  ChangeEvent,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { Web3 } from "web3";
+import Contract from "../../partnerly-contract/artifacts/contracts/Partnership.sol/Partnership.json";
 
 interface Address {
   id: string;
@@ -21,6 +15,7 @@ interface Address {
 export default function Home() {
   const [hasWalletWarning, setHasWalletWarning] = useState(false);
   const [currnetAccount, setCurrnetAccount] = useState(null);
+  const [isDeploying, setIsDeploying] = useState(false);
   const web3 = useRef<Web3 | null>(null);
 
   const [partners, setPartners] = useState([
@@ -39,6 +34,24 @@ export default function Home() {
       split: 1,
     },
   ]);
+
+  useEffect(() => {
+    const hasWallet = checkIfWalletIsConnected();
+    setHasWalletWarning(!hasWallet);
+  }, []);
+
+  useEffect(() => {
+    if (web3.current) {
+      return;
+    }
+
+    if (!checkIfWalletIsConnected()) {
+      return;
+    }
+
+    web3.current = new Web3((window as any).ethereum);
+    web3.current.eth.getBlock("latest").then((block) => console.log(block));
+  }, []);
 
   const addressInputs = partners.map((partner, index) => {
     return (
@@ -102,6 +115,46 @@ export default function Home() {
       console.error(e);
     }
   };
+
+  const handleStartPartnership = async () => {
+    const addresses = [partners[0].address, partners[1].address];
+
+    const splitRatios = [partners[0].split, partners[1].split];
+
+    const contractArguments = [addresses, splitRatios];
+
+    const { abi, bytecode } = Contract;
+    const contract = new web3.current!.eth.Contract(abi);
+
+    const contractDeploymentData = {
+      data: bytecode,
+      arguments: contractArguments,
+    };
+
+    const gas = await contract.deploy(contractDeploymentData).estimateGas();
+
+    setIsDeploying(true);
+
+    contract
+      .deploy(contractDeploymentData)
+      .send({ from: currnetAccount!, gas: `${gas}` })
+      .on("error", (error) => {
+        console.error(error);
+        setIsDeploying(false);
+      })
+      .on("receipt", (receipt) => {
+        console.log(receipt);
+        setIsDeploying(false);
+      })
+      .on("confirmation", () => {
+        console.log("confirmation");
+        setIsDeploying(false);
+      });
+  };
+
+  const hasErrors = partners.some((partner) => partner.error);
+  const hasEmptyValues = partners.some((partner) => !partner.address);
+
 
   function Title({ name }: { name: string }) {
     return (
@@ -251,22 +304,6 @@ export default function Home() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (web3.current) {
-      return;
-    }
-
-    const hasWallet = checkIfWalletIsConnected();
-    setHasWalletWarning(!hasWallet);
-    if (!hasWallet) {
-      return;
-    }
-
-    web3.current = new Web3((window as any).ethereum);
-    web3.current.eth.getBlock("latest").then((block) => console.log(block));
-  }, []);
-
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex flex-1 flex-col items-center justify-start py-8 pt-12 px-6 md:pt-20 text-zinc-700">
@@ -294,9 +331,19 @@ export default function Home() {
           )}
         </section>
 
-        { currnetAccount && (
-          <div className="grid grid-cols-1 gap-3 mb-6">
-            {addressInputs}
+        {currnetAccount && (
+          <div className="grid grid-cols-1 gap-3 mb-6">{addressInputs}</div>
+        )}
+
+        {currnetAccount && (
+          <div className="flex flex-col justify-center items-center p-3">
+            <div>
+              <MainButton
+                onClick={handleStartPartnership}
+                disabled={hasErrors || hasEmptyValues || isDeploying}
+                label={isDeploying? "Deploying" : "Partner Up!"}
+              />
+            </div>
           </div>
         )}
       </main>
